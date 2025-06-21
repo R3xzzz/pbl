@@ -1,0 +1,270 @@
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Segoe UI", "Roboto", sans-serif;
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #333;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+      padding: 32px;
+      max-width: 420px;
+      width: 90%;
+      text-align: center;
+      animation: fadeIn 0.6s ease, floatUp 0.8s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes floatUp {
+      from { transform: translateY(20px); }
+      to { transform: translateY(0); }
+    }
+    .success-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 20px;
+      background: #2ecc71;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .success-icon svg {
+      width: 40px;
+      height: 40px;
+    }
+    h2 {
+      color: #2c3e50;
+      margin-bottom: 15px;
+      font-size: 28px;
+    }
+    .message {
+      color: #34495e;
+      margin-bottom: 25px;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+    .voucher-details {
+      background: rgba(46, 204, 113, 0.1);
+      border: 1px dashed #2ecc71;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 25px;
+    }
+    .voucher-form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin: 15px 0;
+    }
+    .voucher-input {
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      text-align: center;
+      font-family: monospace;
+      letter-spacing: 1px;
+    }
+    .voucher-input:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    }
+    .form-error {
+      color: #e74c3c;
+      font-size: 14px;
+      margin-top: -10px;
+      display: none;
+    }
+    .form-error.visible {
+      display: block;
+    }
+    .time-remaining {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #16a085;
+      margin-bottom: 10px;
+      margin-top: 15px;
+    }
+    .clock-icon {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+    }
+    .countdown-container {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .time-box {
+      background: #2c3e50;
+      color: white;
+      border-radius: 8px;
+      padding: 10px 5px;
+      min-width: 60px;
+      text-align: center;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    }
+    .time-value {
+      font-size: 24px;
+      font-weight: bold;
+      font-family: 'Courier New', monospace;
+    }
+    .time-label {
+      font-size: 12px;
+      margin-top: 3px;
+      text-transform: uppercase;
+      opacity: 0.8;
+    }
+    .time-separator {
+      font-size: 24px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      color: #2c3e50;
+    }
+    .info-text {
+      color: #7f8c8d;
+      font-size: 14px;
+      margin-top: 20px;
+    }
+    .btn {
+      background: linear-gradient(to right, #1e88e5, #1565c0);
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 5px;
+      width: 100%;
+    }
+    .btn:hover {
+      background: linear-gradient(to right, #1976d2, #0d47a1);
+      box-shadow: 0 5px 15px rgba(21, 101, 192, 0.3);
+    }
+    .btn-secondary {
+      background: #95a5a6;
+    }
+    .btn-secondary:hover {
+      background: #7f8c8d;
+    }
+    .btn-generate {
+      background: linear-gradient(to right, #27ae60, #2ecc71);
+      margin-top: 10px;
+    }
+    .btn-generate:hover {
+      background: linear-gradient(to right, #219955, #27ae60);
+    }
+    .btn-disabled {
+      background: #bdc3c7;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+    .btn-disabled:hover {
+      background: #bdc3c7;
+      box-shadow: none;
+    }
+    .voucher-info {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-size: 14px;
+      color: #7f8c8d;
+      text-align: left;
+    }
+    .voucher-info span {
+      font-weight: bold;
+      color: #34495e;
+    }
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: #e0e0e0;
+      margin: 10px 0;
+    }
+    .section-box {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+    .section-icon {
+      width: 18px;
+      height: 18px;
+    }
+    .hidden {
+      display: none;
+    }
+    .generated-filename {
+      font-family: monospace;
+      font-size: 15px;
+      color: #2c3e50;
+      margin-top: 10px;
+      word-break: break-all;
+    }
+    .install-status {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      border-radius: 8px;
+      padding: 12px;
+      margin: 10px 0;
+      color: #856404;
+      font-size: 14px;
+    }
+    .install-status.success {
+      background: #d4edda;
+      border-color: #c3e6cb;
+      color: #155724;
+    }
+    .progress-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin: 15px 0;
+    }
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid #3498db;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }

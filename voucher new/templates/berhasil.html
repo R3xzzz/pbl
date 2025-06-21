@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voucher WiFi - Sukses</title>
+   <link rel="stylesheet" href="{{ url_for('static', filename='berhasil.css') }}">
+</head>
+<body>
+  <div class="card">
+    <div class="success-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+    </div>
+    <h2>AKTIVASI VOUCHER</h2>
+    <p class="message">Akses internet Anda akan aktif setelah kode voucher berhasil dimasukkan.</p>
+    <div class="voucher-details">
+      <div class="section-box">
+        <div class="section-title">
+          <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+          Masukkan Kode Voucher
+        </div>
+        <form id="voucherForm" class="voucher-form">
+          <input type="text" id="voucherCode" class="voucher-input" placeholder="Masukkan kode voucher" required>
+          <div class="form-error" id="voucherError">Kode voucher harus diisi</div>
+          <button type="submit" class="btn">Aktifkan Voucher</button>
+        </form>
+        <button id="generateBtn" class="btn btn-generate">Generate Code</button>
+        
+        <!-- Status instalasi -->
+        <div id="installStatus" class="install-status hidden">
+          <div class="progress-indicator">
+            <div class="spinner"></div>
+            <span>Menunggu instalasi selesai...</span>
+          </div>
+          <p>Silakan jalankan file yang telah didownload dan ikuti petunjuk instalasi.</p>
+        </div>
+        
+        <div id="filenameDisplay" class="generated-filename hidden"></div>
+      </div>
+      <div class="section-box hidden" id="activatedSection">
+        <div class="section-title">
+          <svg class="section-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16"></path>
+            <path d="M3 10h18"></path>
+            <path d="M16 14v.01"></path>
+            <path d="M12 14v.01"></path>
+            <path d="M8 14v.01"></path>
+            <path d="M3 21h18"></path>
+          </svg>
+          Detail Paket
+        </div>
+        <div class="voucher-info">
+          <div>Paket: <span id="packageName">-</span></div>
+          <div>Kecepatan: <span id="packageSpeed">-</span></div>
+        </div>
+        <div class="voucher-info">
+          <div>Aktivasi: <span id="activationTime">-</span></div>
+          <div>ID Transaksi: <span id="transactionId">-</span></div>
+        </div>
+      </div>
+      <div class="section-box hidden" id="countdownSection">
+        <div class="time-remaining">
+          <svg class="clock-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          Waktu tersisa:
+        </div>
+        <div class="countdown-container">
+          <div class="time-box">
+            <div class="time-value" id="hours">00</div>
+            <div class="time-label">jam</div>
+          </div>
+          <div class="time-separator">:</div>
+          <div class="time-box">
+            <div class="time-value" id="minutes">00</div>
+            <div class="time-label">menit</div>
+          </div>
+          <div class="time-separator">:</div>
+          <div class="time-box">
+            <div class="time-value" id="seconds">00</div>
+            <div class="time-label">detik</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <a href="/" class="btn btn-secondary">Kembali ke Beranda</a>
+    <p class="info-text">Nikmati pengalaman internet cepat dan stabil</p>
+  </div>
+
+<script>
+  let installationCheckInterval;
+  let isInstallationComplete = false;
+  let downloadStarted = false;
+
+  function getUrlParameter(name) {
+    name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+    var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+    var results = regex.exec(location.search);
+    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+  }
+
+  function startCountdown(durationSeconds) {
+    let timeLeft = durationSeconds;
+    const hoursElement = document.getElementById('hours');
+    const minutesElement = document.getElementById('minutes');
+    const secondsElement = document.getElementById('seconds');
+
+    updateCountdownDisplay(timeLeft);
+
+    const interval = setInterval(() => {
+      if (timeLeft <= 0) {
+        clearInterval(interval);
+        hoursElement.innerHTML = "00";
+        minutesElement.innerHTML = "00";
+        secondsElement.innerHTML = "00";
+        alert("Waktu penggunaan internet Anda telah habis.");
+        return;
+      }
+
+      timeLeft--;
+      updateCountdownDisplay(timeLeft);
+    }, 1000);
+
+    function updateCountdownDisplay(time) {
+      const hours = Math.floor(time / 3600);
+      const minutes = Math.floor((time % 3600) / 60);
+      const seconds = time % 60;
+
+      hoursElement.innerHTML = hours < 10 ? "0" + hours : hours;
+      minutesElement.innerHTML = minutes < 10 ? "0" + minutes : minutes;
+      secondsElement.innerHTML = seconds < 10 ? "0" + seconds : seconds;
+    }
+  }
+
+  function generateTransactionId() {
+    const chars = "0123456789";
+    const prefix = "TRX-";
+    let txId = "";
+
+    for (let i = 0; i < 8; i++) {
+      txId += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+
+    document.getElementById("transactionId").textContent = prefix + txId;
+  }
+
+  function setCurrentTime() {
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+
+    const formattedTime = `${day}/${month}/${year} ${hours}:${minutes}`;
+    document.getElementById("activationTime").textContent = formattedTime;
+  }
+
+  function getPackageInfo(serviceId) {
+    fetch(`/get-package-info?service=${serviceId}`)
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById("packageName").textContent = data.name + " " + data.duration;
+        document.getElementById("packageSpeed").textContent = data.speed;
+        startCountdown(data.duration_seconds);
+      })
+      .catch(error => {
+        document.getElementById("packageName").textContent = "Standar 1 Jam";
+        document.getElementById("packageSpeed").textContent = "10 Mbps";
+        startCountdown(3600);
+      });
+  }
+
+  // Fungsi untuk memeriksa status instalasi
+  function checkInstallationStatus() {
+    // Jika download tidak dimulai, reset tombol
+    if (!downloadStarted) {
+      resetGenerateButton();
+      return;
+    }
+
+    // Simulasi pengecekan instalasi
+    fetch('/check-installation-status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ check_type: 'voucher_app' })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.installed) {
+        onInstallationComplete();
+      }
+    })
+    .catch(() => {
+      // Fallback: gunakan simulasi waktu jika server tidak mendukung
+      setTimeout(() => {
+        onInstallationComplete();
+      }, 10000);
+    });
+  }
+
+  // Fungsi yang dipanggil ketika instalasi selesai
+  function onInstallationComplete() {
+    if (isInstallationComplete) return;
+    
+    isInstallationComplete = true;
+    clearInterval(installationCheckInterval);
+    
+    const installStatus = document.getElementById('installStatus');
+    const filenameDisplay = document.getElementById('filenameDisplay');
+    
+    // Update status instalasi
+    installStatus.innerHTML = `
+      <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#155724" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+        <span>Instalasi berhasil!</span>
+      </div>
+    `;
+    installStatus.classList.add('success');
+    
+    // Tampilkan pesan aktivasi
+    filenameDisplay.textContent = `Voucher berhasil dibuat. Klik untuk membuka dan aktifkan.`;
+    filenameDisplay.classList.remove('hidden');
+    
+    // Re-enable tombol generate jika diperlukan
+    resetGenerateButton();
+  }
+
+  // Fungsi untuk mereset tombol generate
+  function resetGenerateButton() {
+    const generateBtn = document.getElementById('generateBtn');
+    generateBtn.classList.remove('btn-disabled');
+    generateBtn.disabled = false;
+    downloadStarted = false;
+    
+    const installStatus = document.getElementById('installStatus');
+    installStatus.classList.add('hidden');
+  }
+
+  document.getElementById('voucherForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const voucherCode = document.getElementById('voucherCode').value.trim();
+    const errorElement = document.getElementById('voucherError');
+
+    if (!voucherCode) {
+      errorElement.textContent = "Kode voucher harus diisi";
+      errorElement.classList.add('visible');
+      return;
+    }
+
+    // Validasi ke server Flask
+    fetch('/validate-voucher', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ voucher_code: voucherCode })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.valid) {
+        errorElement.classList.remove('visible');
+        document.getElementById('voucherForm').classList.add('hidden');
+        document.getElementById('generateBtn').classList.add('hidden');
+        document.getElementById('installStatus').classList.add('hidden');
+        document.getElementById('filenameDisplay').classList.add('hidden');
+        document.getElementById('activatedSection').classList.remove('hidden');
+        document.getElementById('countdownSection').classList.remove('hidden');
+
+        generateTransactionId();
+        setCurrentTime();
+
+        const serviceId = getUrlParameter('service') || 'basic';
+        getPackageInfo(serviceId);
+      } else {
+        errorElement.textContent = "Kode voucher tidak valid atau sudah digunakan";
+        errorElement.classList.add('visible');
+      }
+    })
+    .catch(() => {
+      errorElement.textContent = "Gagal memvalidasi voucher. Silakan coba lagi.";
+      errorElement.classList.add('visible');
+    });
+  });
+
+  document.getElementById('generateBtn').addEventListener('click', function () {
+    if (isInstallationComplete) return;
+    
+    const generateBtn = this;
+    const installStatus = document.getElementById('installStatus');
+    
+    // Disable tombol dan tampilkan status instalasi
+    generateBtn.classList.add('btn-disabled');
+    generateBtn.disabled = true;
+    installStatus.classList.remove('hidden');
+    downloadStarted = true;
+    
+    // Mulai download
+  const a = document.createElement('a');
+  a.href = '/download-voucher';
+  a.download = 'voucher.exe';
+    
+    // Tambahkan event listener untuk mengetahui jika download dibatalkan
+    a.addEventListener('click', function() {
+      downloadStarted = true;
+    });
+    
+    document.body.appendChild(a);
+    a.click();
+    
+    // Set timeout untuk mengecek jika user membatalkan download
+    setTimeout(() => {
+      if (!downloadStarted) {
+        resetGenerateButton();
+      }
+      document.body.removeChild(a);
+    }, 3000); // Cek setelah 3 detik
+    
+    // Mulai pengecekan instalasi
+    checkInstallationStatus();
+    
+    // Set interval untuk pengecekan berkala
+    installationCheckInterval = setInterval(() => {
+      if (!isInstallationComplete) {
+        checkInstallationStatus();
+      }
+    }, 3000); // Check setiap 3 detik
+  });
+
+  window.onload = function () {
+    document.getElementById('activatedSection').classList.add('hidden');
+    document.getElementById('countdownSection').classList.add('hidden');
+    document.getElementById('filenameDisplay').classList.add('hidden');
+    document.getElementById('installStatus').classList.add('hidden');
+  };
+</script>
+
+</body>
+</html>

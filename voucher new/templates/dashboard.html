@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Akses WiFi</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.3/leaflet.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.3/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', 'Roboto', sans-serif;
+    }
+    
+    body {
+      background: #f0f2f5;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      width: 100%;
+    }
+    
+    header {
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      color: white;
+      padding: 20px 0;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+    }
+    
+    .header-actions {
+      display: flex;
+      gap: 12px;
+    }
+    
+    .btn {
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: none;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(to right, #1e88e5, #1565c0);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: linear-gradient(to right, #1976d2, #0d47a1);
+      box-shadow: 0 5px 15px rgba(21, 101, 192, 0.2);
+    }
+    
+    .rotate-animation {
+      animation: rotate 0.8s linear;
+    }
+    
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    .dashboard-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 30px;
+    }
+    
+    @media (max-width: 992px) {
+      .dashboard-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      display: flex;
+      align-items: center;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 16px;
+      color: white;
+      font-size: 20px;
+    }
+    
+    .stat-icon.purple {
+      background: linear-gradient(135deg, #6a11cb 0%, #8650dd 100%);
+    }
+    
+    .stat-icon.blue {
+      background: linear-gradient(135deg, #1e88e5 0%, #42a5f5 100%);
+    }
+    
+    .stat-icon.green {
+      background: linear-gradient(135deg, #2ecc71 0%, #4cd964 100%);
+    }
+    
+    .stat-icon.orange {
+      background: linear-gradient(135deg, #ff9500 0%, #ffcc00 100%);
+    }
+    
+    .stat-info {
+      flex: 1;
+    }
+    
+    .stat-title {
+      color: #7f8c8d;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+    
+    .stat-value {
+      font-size: 24px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+    
+    .map-container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+      height: 100%;
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .map-header {
+      padding: 16px;
+      font-weight: 600;
+      font-size: 16px;
+      color: #2c3e50;
+      border-bottom: 1px solid #eee;
+    }
+    
+    #map {
+      flex: 1;
+      min-height: 300px;
+      z-index: 0;
+    }
+    
+    .data-table-container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    
+    .table-header {
+      padding: 16px;
+      font-weight: 600;
+      font-size: 16px;
+      color: #2c3e50;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .table-responsive {
+      overflow-x: auto;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    th, td {
+      padding: 15px;
+      text-align: left;
+    }
+    
+    th {
+      background: #f8f9fa;
+      color: #6a11cb;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+    }
+    
+    tr {
+      border-bottom: 1px solid #eee;
+    }
+    
+    tr:last-child {
+      border-bottom: none;
+    }
+    
+    tr:hover {
+      background: #f8f9fa;
+    }
+    
+    .action-cell {
+      text-align: center;
+    }
+    
+    .btn-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: white;
+      font-size: 20px;
+      background-color: #29a331;
+      margin: 0 8px;
+    }
+    
+    .btn-icon.view {
+      background: #3498db;
+    }
+    
+    .btn-icon.view:hover {
+      background: #2980b9;
+    }
+    
+    .btn-icon.info {
+      background: #27ae60;
+    }
+    
+    .btn-icon.info:hover {
+      background: #2980b9;
+    }
+    
+    .map-link {
+      color: #2575fc;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .map-link:hover {
+      text-decoration: underline;
+    }
+    
+    .timestamp {
+      color: #7f8c8d;
+      font-size: 14px;
+    }
+    
+    .accuracy {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    .high-accuracy {
+      background: rgba(46, 204, 113, 0.1);
+      color: #27ae60;
+    }
+    
+    .medium-accuracy {
+      background: rgba(241, 196, 15, 0.1);
+      color: #f39c12;
+    }
+    
+    .low-accuracy {
+      background: rgba(231, 76, 60, 0.1);
+      color: #e74c3c;
+    }
+    
+    .spinner {
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 3px solid white;
+      width: 16px;
+      height: 16px;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .loading-indicator {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .loading-content {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .large-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(106, 17, 203, 0.3);
+      border-radius: 50%;
+      border-top: 4px solid #6a11cb;
+      animation: spin 1s linear infinite;
+    }
+    
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .modal-content {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+    
+    .close-button {
+      background: none;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      color: #7f8c8d;
+    }
+    
+    .modal-body {
+      margin-bottom: 20px;
+    }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    /* Info modal */
+    #infoModal .modal-body {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: #2c3e50;
+      font-size: 14px;
+    }
+
+    .info-value {
+      font-size: 15px;
+      color: #34495e;
+      word-break: break-all;
+    }
+    
+    .footer {
+      margin-top: auto;
+      text-align: center;
+      color: #95a5a6;
+      font-size: 13px;
+      padding: 20px 0;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.3s ease forwards;
+    }
+    
+    #noData {
+      text-align: center;
+      padding: 30px;
+      color: #7f8c8d;
+      font-size: 16px;
+      display: none;
+    }
+
+    /* Style untuk kontrol lokasi */
+    .leaflet-control-locate a {
+      background-color: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+      padding: 3px;
+    }
+    
+    .leaflet-control-locate a:hover {
+      background-color: #f4f4f4;
+    }
+    
+    .leaflet-control-locate a .fas {
+      color: #2c3e50;
+      font-size: 18px;
+      padding: 5px;
+    }
+    
+    .leaflet-control-locate.active a .fas {
+      color: #2074b6;
+    }
+  </style>
+</head>
+<body>
+  <div class="loading-indicator" id="loadingIndicator">
+    <div class="loading-content">
+      <div class="large-spinner"></div>
+      <div>Memuat data...</div>
+    </div>
+  </div>
+  
+  <div class="modal" id="infoModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Detail Informasi</div>
+        <button class="close-button" onclick="closeInfoModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="infoModalBody">
+        <!-- Informasi akan diisi oleh JavaScript -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="closeInfoModal()">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <header>
+    <div class="container header-content">
+      <h1>Dashboard Akses WiFi</h1>
+      <div class="header-actions">
+        <button class="btn btn-primary" onclick="loadData(true)">
+          <i class="fas fa-sync-alt" id="refreshIcon"></i>
+          Refresh Data
+        </button>
+      </div>
+    </div>
+  </header>
+  
+  <div class="container">
+    <div class="dashboard-layout">
+      <div class="stats-container">
+        <div class="stat-card">
+          <div class="stat-icon purple">
+            <i class="fas fa-wifi"></i>
+          </div>
+          <div class="stat-info">
+            <div class="stat-title">Total Akses</div>
+            <div class="stat-value" id="total-access">0</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue">
+            <i class="fas fa-calendar-day"></i>
+          </div>
+          <div class="stat-info">
+            <div class="stat-title">Akses Hari Ini</div>
+            <div class="stat-value" id="today-access">0</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">
+            <i class="fas fa-bullseye"></i>
+          </div>
+          <div class="stat-info">
+            <div class="stat-title">Akurasi Terbaik</div>
+            <div class="stat-value" id="best-accuracy">0 m</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <div class="stat-info">
+            <div class="stat-title">Akurasi Rata-rata</div>
+            <div class="stat-value" id="avg-accuracy">0 m</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="map-container">
+        <div class="map-header">Peta Lokasi</div>
+        <div id="map"></div>
+      </div>
+    </div>
+    
+    <div class="data-table-container">
+      <div class="table-header">
+        <div>Riwayat Akses</div>
+      </div>
+      <div class="table-responsive">
+        <div id="noData">
+          <i class="fas fa-database" style="font-size: 32px; margin-bottom: 15px; color: #95a5a6;"></i>
+          <p>Tidak ada data untuk ditampilkan</p>
+        </div>
+        <table id="dataTable">
+          <thead>
+            <tr>
+              <th>Waktu</th>
+              <th>Lokasi</th>
+              <th>Akurasi</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="data-table-body">
+            <!-- Data akan diisi oleh JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+  <div class="footer">
+    © 2023 WiFi Voucher System | Hak Cipta Dilindungi
+  </div>
+  
+  <script>
+    // Inisialisasi peta
+    let map = L.map('map').setView([1.1060, 103.9761], 18);
+    let markers = [];
+    let currentLocationMarker = null;
+    let currentLocationCircle = null;
+
+    // Tambahkan tile layer (OpenStreetMap)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // Tambahkan kontrol lokasi saat ini
+    L.control.locate({
+      position: 'bottomright',
+      drawCircle: true,
+      follow: true,
+      setView: true,
+      keepCurrentZoomLevel: true,
+      markerStyle: {
+        weight: 1,
+        opacity: 0.8,
+        fillOpacity: 0.8
+      },
+      circleStyle: {
+        weight: 1,
+        clickable: false
+      },
+      icon: 'fas fa-location-arrow',
+      metric: true,
+      strings: {
+        title: "Lokasi saya saat ini",
+        popup: "Anda berada dalam radius {distance} {unit} dari titik ini",
+        outsideMapBoundsMsg: "Anda berada di luar area peta"
+      },
+      locateOptions: {
+        maxZoom: 18,
+        watch: true,
+        enableHighAccuracy: true,
+        maximumAge: 10000,
+        timeout: 10000
+      }
+    }).addTo(map);
+    
+    // Variabel untuk menyimpan data
+    let allLocationData = [];
+    
+    // Fungsi untuk memuat data
+    async function loadData(showLoading = false) {
+      if (showLoading) {
+        document.getElementById('loadingIndicator').style.display = 'flex';
+        document.getElementById('refreshIcon').classList.add('rotate-animation');
+      }
+      
+      try {
+        const response = await fetch('/get-location-data');
+        const data = await response.json();
+        
+        // Simpan data
+        allLocationData = data.entries;
+        
+        // Update statistik
+        document.getElementById('total-access').textContent = data.total_entries;
+        document.getElementById('today-access').textContent = data.today_entries;
+        document.getElementById('best-accuracy').textContent = data.best_accuracy + ' m';
+        document.getElementById('avg-accuracy').textContent = data.avg_accuracy + ' m';
+        
+        // Update peta
+        updateMap(data.entries);
+        
+        // Update tabel dengan data terbaru di atas
+        updateTable(data.entries);
+        
+        // Tampilkan pesan jika tidak ada data
+        if (data.entries.length === 0) {
+          document.getElementById('noData').style.display = 'block';
+          document.getElementById('dataTable').style.display = 'none';
+        } else {
+          document.getElementById('noData').style.display = 'none';
+          document.getElementById('dataTable').style.display = 'table';
+        }
+        
+      } catch (error) {
+        console.error('Gagal memuat data:', error);
+        alert('Gagal memuat data. Silakan coba lagi.');
+      } finally {
+        document.getElementById('loadingIndicator').style.display = 'none';
+        setTimeout(() => {
+          document.getElementById('refreshIcon').classList.remove('rotate-animation');
+        }, 500);
+      }
+    }
+    
+    // Fungsi untuk memperbarui peta
+    function updateMap(entries) {
+      // Hapus semua marker yang ada
+      markers.forEach(marker => map.removeLayer(marker));
+      markers = [];
+      
+      if (entries.length === 0) return;
+      
+      // Buat array untuk menyimpan semua koordinat
+      const allLatLngs = [];
+      
+      // Buat marker untuk setiap entri
+      entries.forEach((entry, index) => {
+        const lat = parseFloat(entry.latitude);
+        const lng = parseFloat(entry.longitude);
+        const latLng = [lat, lng];
+        allLatLngs.push(latLng);
+        
+        // Warna marker berdasarkan akurasi
+        let markerColor = entry.accuracy < 50 ? 'green' : 
+                          entry.accuracy < 100 ? 'orange' : 'red';
+        
+        // Buat marker
+        const marker = L.circleMarker(latLng, {
+          radius: 8,
+          fillColor: markerColor,
+          color: '#fff',
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.8
+        }).addTo(map);
+        
+        // Tambahkan popup
+        marker.bindPopup(`
+          <b>Waktu:</b> ${entry.timestamp}<br>
+          <b>Koordinat:</b> ${lat}, ${lng}<br>
+          <b>Akurasi:</b> ${entry.accuracy} m
+        `);
+        
+        // Jika ini marker terbaru (index 0), buat lebih menonjol
+        if (index === 0) {
+          marker.setStyle({
+            radius: 12,
+            weight: 3
+          });
+          
+          // Buat lingkaran akurasi untuk marker terbaru
+          const accuracyCircle = L.circle(latLng, {
+            radius: entry.accuracy,
+            fillColor: '#3388ff',
+            fillOpacity: 0.1,
+            color: '#3388ff',
+            weight: 1
+          }).addTo(map);
+          
+          markers.push(accuracyCircle);
+        }
+        
+        markers.push(marker);
+      });
+      
+      // Sesuaikan view peta untuk menampilkan semua marker
+      if (allLatLngs.length > 0) {
+        const bounds = L.latLngBounds(allLatLngs);
+        map.fitBounds(bounds, { padding: [50, 50] });
+      }
+    }
+    
+    // Fungsi untuk memperbarui tabel
+    function updateTable(entries) {
+      const tableBody = document.getElementById('data-table-body');
+      tableBody.innerHTML = '';
+      
+      // Membalikkan urutan array sehingga yang terbaru muncul pertama
+      const reversedEntries = [...entries].reverse();
+      
+      reversedEntries.forEach((entry, index) => {
+        const row = document.createElement('tr');
+        
+        // Format timestamp
+        const timestampCell = document.createElement('td');
+        timestampCell.innerHTML = `<div class="timestamp">${entry.timestamp}</div>`;
+        
+        // Format lokasi
+        const locationCell = document.createElement('td');
+        locationCell.textContent = `${entry.latitude}, ${entry.longitude}`;
+        
+        // Format akurasi
+        const accuracyCell = document.createElement('td');
+        const accuracyClass = entry.accuracy < 50 ? 'high-accuracy' : 
+                             entry.accuracy < 100 ? 'medium-accuracy' : 'low-accuracy';
+        accuracyCell.innerHTML = `<span class="accuracy ${accuracyClass}">${entry.accuracy} m</span>`;
+        
+        // Format aksi
+        const actionCell = document.createElement('td');
+        actionCell.className = 'action-cell';
+        actionCell.innerHTML = `
+          <a href="${entry.maps_link}" target="_blank" class="btn-icon view" title="Lihat di Google Maps">
+            <i class="fas fa-map-marker-alt"></i>
+          </a>
+          <button class="btn-icon info" onclick="showInfoModal(${entries.length - 1 - index})" title="Lihat informasi detail">
+            <i class="fas fa-info"></i>
+          </button>
+        `;
+        
+        row.appendChild(timestampCell);
+        row.appendChild(locationCell);
+        row.appendChild(accuracyCell);
+        row.appendChild(actionCell);
+        
+        tableBody.appendChild(row);
+      });
+    }
+    
+    // Fungsi untuk menampilkan modal informasi
+    function showInfoModal(index) {
+      const entry = allLocationData[index];
+      const infoModalBody = document.getElementById('infoModalBody');
+      
+      // Format tanggal dan waktu lebih manusiawi
+      const timestamp = new Date(entry.timestamp.replace(/-/g, '/'));
+      const formattedDate = timestamp.toLocaleDateString('id-ID', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+      const formattedTime = timestamp.toLocaleTimeString('id-ID');
+      
+      infoModalBody.innerHTML = `
+        <div class="info-item">
+          <div class="info-label">Tanggal</div>
+          <div class="info-value">${formattedDate}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Waktu</div>
+          <div class="info-value">${formattedTime}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Latitude</div>
+          <div class="info-value">${entry.latitude}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Longitude</div>
+          <div class="info-value">${entry.longitude}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Akurasi</div>
+          <div class="info-value">${entry.accuracy} meter</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Link Google Maps</div>
+          <div class="info-value">
+            <a href="${entry.maps_link}" target="_blank" class="map-link">Buka di Google Maps</a>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('infoModal').style.display = 'flex';
+    }
+    
+    function closeInfoModal() {
+      document.getElementById('infoModal').style.display = 'none';
+    }
+    
+    // Muat data saat halaman pertama kali dimuat
+    document.addEventListener('DOMContentLoaded', () => loadData(true));
+    
+    // Atur ulang ukuran peta saat jendela diubah ukurannya
+    window.addEventListener('resize', () => {
+      map.invalidateSize();
+    });
+  </script>
+</body>
+</html>

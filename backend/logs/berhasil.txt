@@ -1,0 +1,3 @@
+{"timestamp": "2025-05-22 18:48:50", "latitude": "1.1246316", "longitude": "104.0503427", "accuracy": "39.463", "maps_link": "https://www.google.com/maps?q=1.1246316,104.0503427"}
+{"timestamp": "2025-06-19 15:39:28", "latitude": "1.1185714", "longitude": "104.0465708", "accuracy": "34.553001403808594", "maps_link": "https://www.google.com/maps?q=1.1185714,104.0465708"}
+{"timestamp": "2025-06-19 15:41:06", "latitude": "1.1185214347886894", "longitude": "104.04684167312911", "accuracy": "97.98563706820313", "maps_link": "https://www.google.com/maps?q=1.1185214347886894,104.04684167312911"}
